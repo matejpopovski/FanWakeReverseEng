@@ -100,6 +100,7 @@ class Fan(TimestampMixin, Base):
     last_outbound_at: Mapped[datetime | None] = mapped_column(DateTime)
     unread_count: Mapped[int] = mapped_column(Integer, default=0)
     last_synced_message_uuid: Mapped[str | None] = mapped_column(String(64))
+    purchases_checked_at: Mapped[datetime | None] = mapped_column(DateTime)
 
     # per-fan engine overrides
     autopilot_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -360,3 +361,14 @@ class MockMedia(Base):
     name: Mapped[str] = mapped_column(String(128))
     media_type: Mapped[str] = mapped_column(String(16), default="image")
     color: Mapped[str] = mapped_column(String(16), default="#888888")
+
+
+class MockPurchase(Base):
+    """Media unlocked by a mock fan (stands in for Fanvue's purchasedByFan flag)."""
+
+    __tablename__ = "mock_purchases"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    fan_uuid: Mapped[str] = mapped_column(ForeignKey("mock_fans.uuid", ondelete="CASCADE"), index=True)
+    media_uuid: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    __table_args__ = (UniqueConstraint("fan_uuid", "media_uuid", name="uq_mock_purchase"),)

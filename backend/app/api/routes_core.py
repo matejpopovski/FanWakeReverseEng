@@ -189,10 +189,14 @@ def get_fan(fan_id: int, db: Session = Depends(get_db)) -> dict[str, Any]:
     eng = load(db, EngineSettings)
     owned = ppv.owned_template_ids(db, fan.id)
     pitched = set(db.scalars(select(PpvOffer.template_id).where(PpvOffer.fan_id == fan.id)))
-    eligible = ppv.eligible_templates(db, fan, eng.repitch_cooldown_msgs)
+    eligible = ppv.eligible_templates(db, fan, eng.repitch_cooldown_msgs, eng.repitch_cooldown_hours,
+                                      eng.min_hours_between_offers)
     d["content"] = {
         "owned_template_ids": sorted(owned), "pitched_template_ids": sorted(pitched - owned),
         "eligible_template_ids": [t.id for t in eligible],
+        "offer_block_reason": ppv.offer_gap_reason(db, fan, eng.min_hours_between_offers),
+        "buying_profile": ppv.fan_buying_profile(db, fan),
+        "purchases_checked_at": fan.purchases_checked_at,
         "offers": [{"id": o.id, "template_id": o.template_id, "status": o.status, "source": o.source,
                     "pitched_at": o.pitched_at, "purchased_at": o.purchased_at,
                     "amount": (o.amount_cents or 0) / 100}

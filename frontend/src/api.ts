@@ -54,6 +54,7 @@ export type FanDetail = FanSummary & {
   first_contact_at: string | null; awakened_at: string | null; reengage_next_at: string | null;
   metrics: Record<string, number>;
   content: { owned_template_ids: number[]; pitched_template_ids: number[]; eligible_template_ids: number[];
+    offer_block_reason: string | null; buying_profile: string; purchases_checked_at: string | null;
     offers: { id: number; template_id: number; status: string; source: string; pitched_at: string | null;
       purchased_at: string | null; amount: number }[] };
   alerts: Alert[]; checkins: Checkin[]; reengage_messages: Msg[];

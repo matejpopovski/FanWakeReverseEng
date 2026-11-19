@@ -7,8 +7,11 @@
 - **Real LLM providers are implemented but not exercised** (no API key). Mock AI produces plausible but simple text.
 
 ## API-imposed
-- Fanvue's message schema has no "this PPV was unlocked" flag → purchases are tracked from manual "Mark sold",
-  payment-webhook-triggered syncs and Fanvue spend totals; per-template revenue in live mode may be incomplete.
+- Fanvue's message schema has no "this PPV was unlocked" flag. Purchases are detected with the official
+  `GET /v1/media/{uuid}?purchasedBy={fan}` lookup (one call per offered template's media, max 3 media per template),
+  run when a fan's spend goes up and every 30 minutes for offers from the last 30 days. Offers older than 30 days and
+  items bought without ever being offered by the app are only known through manual "Mark sold". Live behaviour is
+  untested without credentials.
 - Webhooks need a public HTTPS URL; default is polling (60 s), so reply timing is ≥ poll interval.
 - Rate limit 200 req/min: very large chat lists sync gradually (20 pages × 50 chats per run).
 - Message history import is the latest 50 messages per chat.

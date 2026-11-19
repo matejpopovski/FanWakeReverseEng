@@ -152,6 +152,9 @@ def fan_block(db: Session, fan: Fan, metrics: dict[str, float], safety: SafetySe
         lines.append("Special approach for this fan: " + fan.custom_approach.strip())
     if fan.next_move.strip():
         lines.append("Planned next move: " + fan.next_move.strip())
+    profile = ppv.fan_buying_profile(db, fan)
+    if profile:
+        lines.append("Content history (by tag): " + profile + ". Prefer what they bought; avoid what they passed on.")
     for n in rule_notes:
         lines.append("Rule: " + n)
     return "\n".join(lines)
@@ -167,7 +170,9 @@ def build_request(db: Session, fan: Fan, purpose: str, extra: str = "") -> tuple
     outcome = rules.evaluate(list(db.scalars(select(CustomRule))), metrics)
     allow_ppv = (purpose == "reply" and eng.ppv_enabled and fan.ppv_enabled and not outcome.hold_pitch
                  and eng.approach != "engagement_only")
-    eligible = ppv.eligible_templates(db, fan, eng.repitch_cooldown_msgs) if allow_ppv else []
+    gap_reason = ppv.offer_gap_reason(db, fan, eng.min_hours_between_offers) if allow_ppv else None
+    eligible = ppv.eligible_templates(db, fan, eng.repitch_cooldown_msgs, eng.repitch_cooldown_hours,
+                                      eng.min_hours_between_offers) if allow_ppv else []
     eligible_desc = ppv.describe_for_prompt(db, eligible, fan)
 
     parts = [persona_prompt(persona)]
@@ -193,7 +198,8 @@ def build_request(db: Session, fan: Fan, purpose: str, extra: str = "") -> tuple
         parts.append("ELIGIBLE PPV (offer at most one, only if it fits naturally):\n"
                      + json.dumps(eligible_desc, ensure_ascii=False))
     else:
-        parts.append("ELIGIBLE PPV: none. Do not offer paid content.")
+        why = f" ({gap_reason})" if gap_reason else ""
+        parts.append(f"ELIGIBLE PPV: none{why}. Do not offer paid content.")
     parts.append(SAFETY_BLOCK)
     parts.append(OUTPUT_SPEC)
     system = "\n\n".join(parts)

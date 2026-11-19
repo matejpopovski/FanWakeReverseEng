@@ -34,6 +34,8 @@ contactable) → bubbles sent in order with `sent_bubbles` persisted after each,
 offer attached to the last bubble as pay-to-view (`price`, `mediaUuids`, `mediaPreviewUuid`) → `ppv_offers` row.
 
 ## Not available through the official API (handled differently)
-- Per-message "was this PPV unlocked" flag: not in the message schema → purchases recorded via manual
-  "Mark sold", mock purchase simulation, and (live) payment webhook-triggered syncs + Fanvue spend totals.
+- Per-message "was this PPV unlocked" flag: not in the message schema → `app/services/purchases.py` checks
+  `GET /v1/media/{uuid}?purchasedBy={fanUuid}` (`purchasedByFan`) for every open offer's media when the fan's spend
+  increases and in a 30-minute sweep (offers ≤30 days old); manual "Mark sold" covers the rest. Mock mode stores
+  unlocks in `mock_purchases` and goes through the same detection path.
 - Platform "AI reply" features (CHAT_TEXT_* message types) are Fanvue-internal and unused.

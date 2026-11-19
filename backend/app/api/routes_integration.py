@@ -141,7 +141,8 @@ class PurchaseIn(BaseModel):
 
 @router.post("/mock/simulate-purchase")
 def simulate_purchase(body: PurchaseIn, db: Session = Depends(get_db)) -> dict[str, Any]:
-    """Mock-mode stand-in for a `creator.payment.succeeded` webhook on a pitched PPV."""
+    """Mock mode: the fan unlocks an offered PPV on "Fanvue". The app then finds it through the same purchase
+    detection used in live mode (media purchasedBy lookup), not by writing the purchase directly."""
     _require_mock()
     fan = db.get(Fan, body.fan_id)
     if fan is None:
@@ -153,15 +154,27 @@ def simulate_purchase(body: PurchaseIn, db: Session = Depends(get_db)) -> dict[s
     from app.models import PpvTemplate
 
     tpl = db.get(PpvTemplate, body.template_id)
-    amount = tpl.price_cents if tpl else 0
-    offer.status, offer.purchased_at, offer.amount_cents = "purchased", utcnow(), amount
-    fan.ppv_purchases += 1
-    fan.total_spent_cents += amount
-    fan.last_purchase_at = offer.purchased_at
-    MockFanvueClient(db).record_purchase(fan.fanvue_uuid, amount)
-    jobs.audit(db, "system", "ppv.purchased", "fan", fan.id, template_id=body.template_id, source="mock")
+    client = MockFanvueClient(db)
+    client.unlock_media(fan.fanvue_uuid, list(tpl.media_uuids or []) if tpl else [], tpl.price_cents if tpl else 0)
     db.commit()
-    return {"ok": True}
+    sync.refresh_insight(db, client, fan)  # spend went up -> purchase detection runs
+    db.commit()
+    return {"ok": True, "detected": db.get(PpvOffer, offer.id).status == "purchased"}  # type: ignore[union-attr]
+
+
+@router.post("/fans/{fan_id}/detect-purchases")
+def detect_purchases_now(fan_id: int, db: Session = Depends(get_db)) -> dict[str, Any]:
+    from app.services import purchases
+
+    fan = db.get(Fan, fan_id)
+    if fan is None:
+        raise HTTPException(404, "fan not found")
+    try:
+        n = purchases.detect_for_fan(db, get_client(db), fan, force=True)
+    except FanvueError as exc:
+        raise HTTPException(502, str(exc)) from exc
+    db.commit()
+    return {"detected": n}
 
 
 @router.get("/mock/fans")

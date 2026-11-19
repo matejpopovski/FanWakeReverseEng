@@ -21,7 +21,10 @@
      conversation rules + **non-overridable safety block** + output format spec.
    - Fan block = display name, status, spend, purchases, tags, operator notes, memory (`[ABOUT] [BUYING]
      [DYNAMIC] [NOW]`), custom per-fan approach, rule notes, local time for creator.
-   - PPV block (only if pitching allowed): eligible templates after gates, ownership, cooldown, holds.
+   - PPV block (only if pitching allowed): eligible templates after gates, ownership, message + hour cooldowns,
+     minimum gap since the fan's last offer, and holds; each item carries its track record (sales/offers). If nothing
+     is eligible the prompt states why (e.g. "last offer was 3h ago").
+   - Fan content history by tag ("bought before: premium x2; offered but not bought: tease x1").
    - History = last N messages (default 30) as alternating turns, oldest first. Never invented details.
 6. **Generation**: provider adapter returns JSON `{messages: [..1-2 strings], ppv_template_id|null,
    memory_update|null, next_move, checkin: {text, at}|null, nudge|null}`. Prompt versions are stored

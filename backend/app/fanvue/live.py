@@ -8,6 +8,7 @@ Endpoints used (all /v1, header X-Fanvue-API-Version):
   POST /v1/chats/{userUuid}/typing          write:chat
   GET  /v1/insights/fans/{userUuid}         read:insights + read:fan
   GET  /v1/media                            read:media
+  GET  /v1/media/{uuid}?purchasedBy=        read:media   (purchase detection)
 """
 
 from __future__ import annotations
@@ -200,6 +201,11 @@ class LiveFanvueClient:
             out.append(RemoteMedia(uuid=m["uuid"], name=m.get("name") or m.get("caption") or m["uuid"][:8],
                                    media_type=m.get("mediaType", "image"), url=thumb))
         return out, d.get("nextCursor")
+
+    def media_purchased_by(self, fan_uuid: str, media_uuid: str) -> bool:
+        """GET /v1/media/{uuid}?purchasedBy={fan} -> purchasedByFan (read:media)."""
+        d = self._request("GET", f"/v1/media/{media_uuid}", params={"purchasedBy": fan_uuid})
+        return bool((d or {}).get("purchasedByFan"))
 
     def typing(self, fan_uuid: str) -> None:
         try:

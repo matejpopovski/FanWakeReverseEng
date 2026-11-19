@@ -23,7 +23,7 @@ from app.fanvue.base import (
     RemoteMedia,
     RemoteMessage,
 )
-from app.models import MockFan, MockMedia, MockMessage
+from app.models import MockFan, MockMedia, MockMessage, MockPurchase
 
 MOCK_CREATOR = Me(uuid="mock-creator-0001", handle="demo_creator", display_name="Demo Creator")
 
@@ -65,7 +65,19 @@ class MockFanvueClient:
         fan.last_purchase_at = utcnow()
         self.db.flush()
 
+    def unlock_media(self, fan_uuid: str, media_uuids: list[str], amount_cents: int) -> None:
+        """Simulate a fan unlocking a paid message: marks media purchased and adds the spend."""
+        for m in media_uuids:
+            if self.db.scalar(select(MockPurchase).where(MockPurchase.fan_uuid == fan_uuid,
+                                                         MockPurchase.media_uuid == m)) is None:
+                self.db.add(MockPurchase(fan_uuid=fan_uuid, media_uuid=m))
+        self.record_purchase(fan_uuid, amount_cents)
+
     # -- FanvueClient protocol -------------------------------------------------------------------------
+    def media_purchased_by(self, fan_uuid: str, media_uuid: str) -> bool:
+        return self.db.scalar(select(MockPurchase.id).where(MockPurchase.fan_uuid == fan_uuid,
+                                                            MockPurchase.media_uuid == media_uuid)) is not None
+
     def get_me(self) -> Me:
         return MOCK_CREATOR
 

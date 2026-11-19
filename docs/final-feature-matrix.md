@@ -23,7 +23,10 @@ against the official API, untested without credentials; **PARTIAL**; **NOT BUILT
 | Escalations & nudges | Yes | Yes + built-in policy categories | classifier fixtures, `test_escalation_*`, e2e | WORKING-MOCK | Regex classifier |
 | Custom rules engine (16 metrics, 5 actions, placeholders) | Yes (10 on Pro) | Yes (20 max) | `test_rules_*` | WORKING-MOCK | |
 | PPV library, tags with meanings, gates, tip reward, cooldown | Yes | Yes | `test_ppv_*`, e2e | WORKING-MOCK | Folders not built (tags only) |
-| PPV offer sending (pay-to-view, preview) | Yes | Yes via `POST /v1/chats/{uuid}/message` | `test_ppv_draft_send_records_offer` | WORKING-MOCK / LIVE-READY | Purchase detection limited (see limitations) |
+| PPV offer sending (pay-to-view, preview) | Yes | Yes via `POST /v1/chats/{uuid}/message` | `test_ppv_draft_send_records_offer` | WORKING-MOCK / LIVE-READY | |
+| Automatic purchase detection | Inferred | `media purchasedBy` lookup on spend increase + 30-min sweep; "Check now" per fan | `tests/test_sales.py` | WORKING-MOCK / LIVE-READY | 30-day lookback |
+| Sales learning (item track record, fan buying profile by tag) | Not observed | Added to every prompt | `test_prompt_includes_track_record_*` | WORKING-MOCK | Needs real LLM to matter |
+| Time-based re-offer cooldown + minimum gap between offers | Message-count cooldown only | Both message and hour cooldowns; min gap (default 12h); no new offer while one is in flight | `test_time_cooldown_*`, `test_min_gap_*`, `test_in_flight_*` | WORKING-MOCK | |
 | Re-engagement (attempts, schedule, silence, repeat, window, hours, cap, approaches, teaser media) | Yes | Yes | `test_reengage_*` | WORKING-MOCK | |
 | Persona (identity, tone, behaviours, style, Q&A, examples, custom prompt) | Yes | Yes + prompt preview + versions | persona tests | WORKING-MOCK | 12 languages listed (any works via text) |
 | AI providers, token & cost tracking, prompt versioning | Hidden | Mock / Anthropic / OpenAI-compatible; per-call usage; versions per draft | provider contract tests | WORKING-MOCK / LIVE-READY | Real LLM untested |

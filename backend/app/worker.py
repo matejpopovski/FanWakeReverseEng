@@ -28,6 +28,7 @@ PERIODIC: list[tuple[str, int]] = [  # (kind, every_seconds)
     ("checkins_due", 60),
     ("expire_drafts", 60 * 60),
     ("retention", 24 * 60 * 60),
+    ("detect_purchases", 30 * 60),
 ]
 
 
@@ -59,6 +60,13 @@ def _h_retention(db: Session, p: dict[str, Any]) -> None:
     purge_old(db)
 
 
+def _h_purchases(db: Session, p: dict[str, Any]) -> None:
+    from app.fanvue import get_client
+    from app.services import purchases
+
+    purchases.detect_recent(db, get_client(db))
+
+
 HANDLERS: dict[str, Callable[[Session, dict[str, Any]], None]] = {
     "sync_fanvue": _h_sync,
     "generate_reply": _h_generate,
@@ -67,6 +75,7 @@ HANDLERS: dict[str, Callable[[Session, dict[str, Any]], None]] = {
     "checkins_due": _h_checkins,
     "expire_drafts": _h_expire,
     "retention": _h_retention,
+    "detect_purchases": _h_purchases,
 }
 
 

@@ -82,6 +82,8 @@ function FanDrawer({ id, onClose }: { id: number; onClose: () => void }) {
     onSuccess: () => qc.invalidateQueries() });
   const sold = useMutation({ mutationFn: (template_id: number) => api.post(`/api/fans/${id}/ppv-sales`, { template_id }),
     onSuccess: () => qc.invalidateQueries() });
+  const detect = useMutation({ mutationFn: () => api.post<{ detected: number }>(`/api/fans/${id}/detect-purchases`),
+    onSuccess: () => qc.invalidateQueries() });
   const forget = useMutation({ mutationFn: () => api.del(`/api/fans/${id}/data`), onSuccess: () => qc.invalidateQueries() });
   const f = fan.data;
   const [notes, setNotes] = useState("");
@@ -151,7 +153,14 @@ function FanDrawer({ id, onClose }: { id: number; onClose: () => void }) {
                       <li key={o.id}>{tname(o.template_id)} · {statusBadge(o.status === "purchased" ? "sent" : "pending")}
                         <span className="text-xs text-slate-500"> {o.status} via {o.source} {ago(o.purchased_at ?? o.pitched_at)}</span></li>))}</ul>
                   </Card>
+                  <Card title="Purchases" subtitle={`Checked on Fanvue ${ago(f.content.purchases_checked_at)}`}
+                    actions={<button className="btn-ghost" onClick={() => detect.mutate()} disabled={detect.isPending}
+                      data-testid="detect-purchases">{detect.isPending ? "Checking…" : "Check now"}</button>}>
+                    {detect.data && <p className="text-sm text-emerald-700">{detect.data.detected} new purchase(s) found.</p>}
+                    <p className="text-sm">{f.content.buying_profile || <span className="muted">No offers or purchases yet.</span>}</p>
+                  </Card>
                   <Card title="Still offerable" subtitle="Active templates passing this fan's gates, not owned, not on cooldown.">
+                    {f.content.offer_block_reason && <p className="mb-2 text-sm text-amber-700">No offers right now: {f.content.offer_block_reason}.</p>}
                     <ul className="text-sm">{f.content.eligible_template_ids.map((t) => <li key={t}>• {tname(t)}</li>)}</ul>
                   </Card>
                   <Card title="Record a sale" subtitle="Bought before this app existed? Mark it so it is never offered again.">
@@ -228,7 +237,7 @@ function FanDrawer({ id, onClose }: { id: number; onClose: () => void }) {
                   </Card>
                 </>
               )}
-              <ErrorBox error={patch.error || sold.error || forget.error} />
+              <ErrorBox error={patch.error || sold.error || forget.error || detect.error} />
             </div>
           </>
         )}

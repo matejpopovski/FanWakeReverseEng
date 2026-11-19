@@ -11,7 +11,8 @@ type Engine = {
   quiet_hours_enabled: boolean; quiet_from_hour: number; quiet_to_hour: number; timezone: string;
   checkins_enabled: boolean; checkins_per_week: number; checkin_guidance: string; approach: string;
   custom_prompt: string; conversation_rules: string; escalation_keywords: string[]; nudge_keywords: string[];
-  ppv_enabled: boolean; repitch_cooldown_msgs: number | null; max_bubbles: number; expire_pending_after_hours: number;
+  ppv_enabled: boolean; repitch_cooldown_msgs: number | null; repitch_cooldown_hours: number | null;
+  min_hours_between_offers: number; max_bubbles: number; expire_pending_after_hours: number;
   [k: string]: unknown;
 };
 
@@ -128,7 +129,17 @@ export default function Autopilot() {
             <div className="mt-3"><Field label="Re-offer an unpurchased item after">
               <select value={d.repitch_cooldown_msgs ?? "off"} onChange={(e) => s.set("repitch_cooldown_msgs", e.target.value === "off" ? null : Number(e.target.value))}>
                 <option value="off">Never re-offer</option><option value={25}>25 messages</option><option value={50}>50 messages</option></select></Field></div>
-            <p className="muted mt-2">Purchased items are never offered again.</p>
+            {d.repitch_cooldown_msgs !== null && (
+              <div className="mt-3"><Field label="…and at least this many hours (blank = no time limit)">
+                <input type="number" min={0} value={d.repitch_cooldown_hours ?? ""} data-testid="repitch-hours"
+                  onChange={(e) => s.set("repitch_cooldown_hours", e.target.value === "" ? null : Number(e.target.value))} /></Field></div>
+            )}
+            <div className="mt-3"><Field label="Minimum hours between any two offers to the same fan" hint="0 = no minimum gap">
+              <input type="number" min={0} value={d.min_hours_between_offers} data-testid="offer-gap"
+                onChange={(e) => s.set("min_hours_between_offers", Number(e.target.value))} /></Field></div>
+            <p className="muted mt-2">Purchased items are never offered again. Purchases are detected automatically from Fanvue
+              (checked when a fan's spend goes up, and every 30 minutes for recent offers). The AI also sees each item's
+              sales rate and what each fan bought or passed on before.</p>
           </Card>
           <RulesCard />
         </div>

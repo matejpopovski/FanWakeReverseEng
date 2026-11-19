@@ -13,7 +13,7 @@ from app.fanvue import get_client
 from app.fanvue.base import ChatSummary, FanvueClient, FanvueError, RemoteMessage
 from app.fanvue.oauth import get_connection
 from app.models import Draft, Fan, Message
-from app.services import engine, jobs
+from app.services import engine, jobs, purchases
 
 FRESH_WINDOW = timedelta(hours=24)  # only react to inbound messages this recent
 
@@ -50,9 +50,13 @@ def refresh_insight(db: Session, client: FanvueClient, fan: Fan) -> None:
     except FanvueError:
         return
     fan.status = ins.status
+    before = fan.total_spent_cents
     # keep locally-observed tips; total spend comes from Fanvue
     fan.total_spent_cents = max(ins.spent_cents, fan.tip_total_cents)
     fan.last_purchase_at = ins.last_purchase_at or fan.last_purchase_at
+    if fan.total_spent_cents > before and before >= 0:
+        # spend went up: check whether any offered PPV was unlocked
+        purchases.detect_for_fan(db, client, fan, force=True)
 
 
 def _ingest(db: Session, fan: Fan, remote: list[RemoteMessage], backfill: bool,

@@ -45,6 +45,8 @@ class EngineSettings(BaseModel):
     nudge_keywords: list[str] = Field(default_factory=lambda: ["custom video", "custom content", "dick rating"])
     ppv_enabled: bool = True
     repitch_cooldown_msgs: int | None = 25  # None = never re-pitch unpurchased
+    repitch_cooldown_hours: int | None = Field(default=72, ge=0, le=24 * 60)  # also require this much time
+    min_hours_between_offers: int = Field(default=12, ge=0, le=24 * 14)  # any offer to the same fan; 0 = off
     max_bubbles: int = Field(default=2, ge=1, le=3)
     expire_pending_after_hours: int = Field(default=24, ge=1, le=168)
 
