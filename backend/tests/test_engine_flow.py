@@ -385,3 +385,37 @@ def test_expire_drafts(seeded: Session) -> None:
     seeded.add(d)
     seeded.commit()
     assert engine.expire_drafts(seeded) == 1
+
+
+def test_worker_retries_then_dead_letters(seeded: Session, monkeypatch: pytest.MonkeyPatch) -> None:
+    from app import worker
+    from app.fanvue.base import FanvueError
+
+    def boom(db, p):  # type: ignore[no-untyped-def]
+        raise FanvueError("upstream 503", 503, retryable=True)
+
+    monkeypatch.setitem(worker.HANDLERS, "sync_fanvue", boom)
+    j = jobs.enqueue(seeded, "sync_fanvue", {})
+    seeded.commit()
+    for _ in range(6):
+        j = seeded.get(Job, j.id)
+        if j.status == "dead":
+            break
+        j.status, j.attempts, j.run_at = "running", j.attempts + 1, utcnow()
+        seeded.commit()
+        run_job(seeded, j)
+    seeded.expire_all()
+    j = seeded.get(Job, j.id)
+    assert j.status == "dead" and "503" in j.last_error
+
+
+def test_worker_tick_processes_due_jobs(seeded: Session) -> None:
+    from app import worker
+
+    enable_engine(seeded)
+    fan = contactable_fan(seeded)
+    say(seeded, fan, "tick test")
+    processed = worker.tick(periodic=False)
+    assert processed >= 1
+    seeded.expire_all()
+    assert seeded.scalar(select(Draft).where(Draft.fan_id == fan.id, Draft.status == "pending"))

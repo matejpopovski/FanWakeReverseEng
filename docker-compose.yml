@@ -1,0 +1,18 @@
+# Optional containerised setup. The app is private: keep the port bound to localhost.
+services:
+  app:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://wakeful:wakeful@db:5432/wakeful
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      db: { condition: service_healthy }
+    restart: unless-stopped
+  db:
+    image: postgres:17-alpine
+    environment: { POSTGRES_USER: wakeful, POSTGRES_PASSWORD: wakeful, POSTGRES_DB: wakeful }
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U wakeful"], interval: 5s, retries: 10 }
+volumes:
+  pgdata: {}

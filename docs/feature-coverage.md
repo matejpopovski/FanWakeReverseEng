@@ -5,18 +5,18 @@ See `final-feature-matrix.md` for the end-of-project state.
 
 | Feature | FanWake | Rebuild |
 |---|---|---|
-| Overview KPIs + chart | VERIFIED | PLANNED |
-| Fan list / filters / search | VERIFIED | PLANNED |
-| Fan drawer (notes, tags, content, engine overrides, memory, activity) | VERIFIED | PLANNED |
-| Inbox / thread view | NOT IN FANWAKE | PLANNED |
-| Review queue + archive | VERIFIED | PLANNED |
-| Autopilot settings | VERIFIED | PLANNED |
-| Custom rules engine | VERIFIED | PLANNED |
-| Escalations / nudges | VERIFIED | PLANNED |
-| Scheduled check-ins | VERIFIED | PLANNED |
-| Persona + prompt | VERIFIED | PLANNED |
-| PPV library + gates | VERIFIED | PLANNED |
-| Re-engagement | VERIFIED | PLANNED |
-| Fanvue OAuth connect | VERIFIED | PLANNED |
-| Telegram notifications | UNVERIFIED | OMITTED (later) |
+| Overview KPIs + chart | VERIFIED | WORKING-MOCK |
+| Fan list / filters / search | VERIFIED | WORKING-MOCK |
+| Fan drawer (notes, tags, content, engine overrides, memory, activity) | VERIFIED | WORKING-MOCK |
+| Inbox / thread view | NOT IN FANWAKE | WORKING-MOCK |
+| Review queue + archive | VERIFIED | WORKING-MOCK |
+| Autopilot settings | VERIFIED | WORKING-MOCK |
+| Custom rules engine | VERIFIED | WORKING-MOCK |
+| Escalations / nudges | VERIFIED | WORKING-MOCK |
+| Scheduled check-ins | VERIFIED | WORKING-MOCK |
+| Persona + prompt | VERIFIED | WORKING-MOCK |
+| PPV library + gates | VERIFIED | WORKING-MOCK |
+| Re-engagement | VERIFIED | WORKING-MOCK |
+| Fanvue OAuth connect | VERIFIED | LIVE-READY (untested without credentials) |
+| Telegram notifications | UNVERIFIED | NOT BUILT |
 | Billing / plans / referral | VERIFIED | OMITTED (N/A) |

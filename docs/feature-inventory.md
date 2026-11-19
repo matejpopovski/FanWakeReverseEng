@@ -1,6 +1,6 @@
 # Feature inventory (FanWake reference, observed 2026-11-19)
 
-Source: read-only exploration of the authenticated FanWake web app in Chrome, account `@avaanoire` (Pro plan).
+Source: read-only exploration of the authenticated FanWake web app in Chrome (Pro plan account).
 No settings were saved, no messages sent, no templates created. Fan names, handles, message text and
 prompt text are deliberately **not** reproduced here (private data / proprietary prompt content).
 

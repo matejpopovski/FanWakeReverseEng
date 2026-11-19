@@ -5,3 +5,8 @@
 - Repo was empty (`main`, no commits). Working on branch `claude/project-thread-qdue2b`.
 - Phase 1 exploration complete: Overview, Fans (+drawer 4 tabs), Review (+archive), Autopilot (all collapsibles), PPV (+template form, cancelled), Re-engage, Persona, Connect, Account, Billing. Only read-only interactions; nothing saved or sent.
 - Fanvue official API + usage policy researched; OpenAPI path list saved.
+- Phase 2 design docs written (architecture, schema, contracts, AI design, integration, security, plan).
+- Phase 3/4 built: FastAPI backend (SQLite + Alembic, job worker, mock + live Fanvue clients, OAuth PKCE, AI engine with guardrails, rules, PPV, re-engagement, check-ins) and React SPA (11 pages).
+- Phase 5: 77 backend tests, 7 frontend unit tests, 7 Playwright e2e tests passing; ruff, mypy, tsc clean. Manually exercised in the browser: login, autopilot enable, simulated fan message, draft with PPV offer, approve and send.
+- Bugs found and fixed during manual testing: activity chart bars had zero height; Inbox crashed because an effect returned the Promise from Chrome's scrollIntoView; e2e race on template count; sent list did not auto-refresh.
+- Phase 6 docs: README, setup, configuration, testing, deployment, limitations, final feature matrix.
