@@ -1,0 +1,16 @@
+.env
+*.env.local
+data/
+backups/
+backend/.venv/
+backend/app/static/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+.DS_Store
