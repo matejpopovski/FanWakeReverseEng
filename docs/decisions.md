@@ -14,3 +14,4 @@
 | D10 | 2026-11-19 | Sync by polling (`/v1/chats` + per-chat messages) with optional webhook endpoint (HMAC verified) for when a tunnel exists. | Laptop has no public URL. |
 | D11 | 2026-11-19 | Tokens encrypted at rest with Fernet key from env; operator login via password hash in env + HttpOnly session cookie; server binds 127.0.0.1. | Policy §10; single operator. |
 | D12 | 2026-11-19 | AI providers: `mock` (deterministic, offline), `anthropic`, `openai` (compatible). Token + cost tracked per call. | Testability and choice. |
+| D13 | 2026-11-19 | Operator login is optional and off by default (Matej's request). CSRF header check stays on; server binds 127.0.0.1. | Single user on own Mac; password was friction. |

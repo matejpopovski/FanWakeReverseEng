@@ -19,7 +19,7 @@ from app.fanvue.base import FanvueError
 from app.fanvue.mock import MockFanvueClient
 from app.fanvue.webhooks import verify_signature
 from app.models import AiUsage, AuditLog, Draft, Fan, Job, Message, MockFan, MockMedia, PpvOffer, WebhookEvent
-from app.security import SESSION_COOKIE, check_session, require_operator
+from app.security import is_signed_in, require_operator
 from app.services import jobs, sync
 
 router = APIRouter(prefix="/api", dependencies=[Depends(require_operator)])
@@ -53,7 +53,7 @@ def connect(db: Session = Depends(get_db)) -> dict[str, str]:
 @public.get("/fanvue/oauth/callback")
 def oauth_callback(request: Request, state: str = "", code: str = "", error: str = "",
                    db: Session = Depends(get_db)) -> RedirectResponse:
-    if not check_session(request.cookies.get(SESSION_COOKIE)):
+    if not is_signed_in(request):
         raise HTTPException(401, "Sign in to the app first, then connect Fanvue")
     if error:
         return RedirectResponse(f"/connect?error={error[:64]}")

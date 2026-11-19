@@ -4,8 +4,9 @@ Requirements: Python 3.13 + [uv](https://docs.astral.sh/uv/), Node 20+, macOS/Li
 
 1. `make setup` — installs backend (`backend/.venv`) and frontend (`frontend/node_modules`), creates `.env`.
 2. `make keys` — prints `SECRET_KEY` and `TOKEN_ENCRYPTION_KEY`; paste them into `.env`.
-3. Set an operator password: either `ADMIN_PASSWORD=...` (simple) or `make hash-password` and put the result in
-   `ADMIN_PASSWORD_HASH` (preferred; then remove `ADMIN_PASSWORD`).
+3. Login is optional. With `ADMIN_PASSWORD` and `ADMIN_PASSWORD_HASH` both empty (the default) there is no login
+   screen and the app only listens on 127.0.0.1. To require a password, set `ADMIN_PASSWORD=...` or put the output of
+   `make hash-password` in `ADMIN_PASSWORD_HASH`.
 4. `make start` (single process on http://localhost:8000) or `make dev` (hot reload, UI on http://localhost:5173).
 
 On start the app runs migrations (`alembic upgrade head`), writes default settings, and in mock mode seeds 30

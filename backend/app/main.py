@@ -40,6 +40,11 @@ def bootstrap() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     s = get_settings()
+    from app.security import auth_enabled
+
+    if not auth_enabled() and s.host not in ("127.0.0.1", "localhost", "::1"):
+        log.warning("No ADMIN_PASSWORD set and HOST=%s is not loopback: anyone who can reach this port can "
+                    "use the app. Set ADMIN_PASSWORD or bind to 127.0.0.1.", s.host)
     if s.app_env != "test":
         bootstrap()
     stop = asyncio.Event()

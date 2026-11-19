@@ -1,8 +1,9 @@
 # Security, privacy and safety
 
 ## Authentication
-- Single operator. `ADMIN_PASSWORD_HASH` (bcrypt via `python -m app.cli hash-password`) or, for first run only,
-  `ADMIN_PASSWORD` in `.env`. Login sets an HttpOnly, SameSite=Strict, signed session cookie (`SECRET_KEY`).
+- Single operator. Login is **optional** (decision D13): with no `ADMIN_PASSWORD`/`ADMIN_PASSWORD_HASH` there is no
+  login and the app relies on listening only on 127.0.0.1 (a warning is logged if HOST is not loopback). With a
+  password set, login issues an HttpOnly, SameSite=Strict, signed session cookie (`SECRET_KEY`).
 - All `/api/*` routes except `/api/auth/login`, `/api/health`, `/api/fanvue/oauth/callback` (state-checked)
   and `/api/webhooks/fanvue` (HMAC-checked) require the session.
 - State-changing requests require the `X-Requested-With: wakeful` header (simple CSRF defence with SameSite).

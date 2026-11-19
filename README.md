@@ -11,11 +11,11 @@ and puts everything through a review queue before it reaches a fan.
 
 ```bash
 make setup          # uv sync + npm install + creates .env from .env.example
-make keys           # paste SECRET_KEY / TOKEN_ENCRYPTION_KEY into .env, set ADMIN_PASSWORD
+make keys           # paste SECRET_KEY / TOKEN_ENCRYPTION_KEY into .env
 make start          # builds the UI and serves everything on http://localhost:8000
 ```
 
-Sign in with `ADMIN_PASSWORD`. Then: Autopilot → enable → Save; Inbox → "Simulate fan message"; Review → edit/approve.
+There is no login by default (local only; set `ADMIN_PASSWORD` if you want one). Then: Autopilot → enable → Save; Inbox → "Simulate fan message"; Review → edit/approve.
 For development with hot reload use `make dev` (API :8000 + Vite :5173).
 
 ## What it does

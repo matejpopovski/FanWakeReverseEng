@@ -24,18 +24,21 @@ const NAV = [
 
 export default function App() {
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const [loginRequired, setLoginRequired] = useState(true);
   useEffect(() => {
-    api.get("/api/auth/session").then(() => setAuthed(true)).catch(() => setAuthed(false));
+    api.get<{ ok: boolean; auth_enabled: boolean }>("/api/auth/session")
+      .then((r) => { setLoginRequired(r.auth_enabled); setAuthed(true); })
+      .catch(() => setAuthed(false));
     const onUnauth = () => setAuthed(false);
     window.addEventListener("wakeful:unauthorized", onUnauth);
     return () => window.removeEventListener("wakeful:unauthorized", onUnauth);
   }, []);
   if (authed === null) return <Loading />;
   if (!authed) return <Login onDone={() => setAuthed(true)} />;
-  return <Shell onLogout={() => setAuthed(false)} />;
+  return <Shell onLogout={loginRequired ? () => setAuthed(false) : undefined} />;
 }
 
-function Shell({ onLogout }: { onLogout: () => void }) {
+function Shell({ onLogout }: { onLogout?: () => void }) {
   const qc = useQueryClient();
   const nav = useNavigate();
   const status = useQuery({ queryKey: ["status"], queryFn: () => api.get<Status>("/api/status"), refetchInterval: 10000 });
@@ -62,8 +65,10 @@ function Shell({ onLogout }: { onLogout: () => void }) {
             </NavLink>
           ))}
         </nav>
-        <button className="px-3 py-2 text-left text-sm text-slate-500 hover:text-white"
-          onClick={() => api.post("/api/auth/logout").finally(onLogout)}>Sign out</button>
+        {onLogout ? (
+          <button className="px-3 py-2 text-left text-sm text-slate-500 hover:text-white"
+            onClick={() => api.post("/api/auth/logout").finally(onLogout)}>Sign out</button>
+        ) : <div className="px-3 py-2 text-xs text-slate-600">Local mode · no login</div>}
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-10 flex flex-wrap items-center gap-3 border-b border-slate-200 bg-white/90 px-6 py-3 backdrop-blur">

@@ -15,7 +15,14 @@ from app.config import get_settings
 from app.db import get_db, utcnow
 from app.fanvue.oauth import get_connection
 from app.models import AiUsage, Alert, Checkin, Draft, Fan, Message, PpvOffer, PpvTemplate
-from app.security import SESSION_COOKIE, SESSION_MAX_AGE, issue_session, require_operator, verify_password
+from app.security import (
+    SESSION_COOKIE,
+    SESSION_MAX_AGE,
+    auth_enabled,
+    issue_session,
+    require_operator,
+    verify_password,
+)
 from app.services import jobs, ppv
 from app.services.metrics import fan_metrics
 from app.settings_store import EngineSettings, ReengageSettings, SafetySettings, load
@@ -31,6 +38,8 @@ class LoginIn(BaseModel):
 
 @public.post("/auth/login")
 def login(body: LoginIn, response: Response) -> dict[str, bool]:
+    if not auth_enabled():
+        return {"ok": True}
     if not verify_password(body.password):
         raise HTTPException(401, "Wrong password")
     response.set_cookie(SESSION_COOKIE, issue_session(), max_age=SESSION_MAX_AGE, httponly=True,
@@ -361,5 +370,5 @@ def cancel_checkin(cid: int, db: Session = Depends(get_db)) -> dict[str, Any]:
 
 @router.get("/auth/session")
 def session_ok() -> dict[str, bool]:
-    return {"ok": True}
+    return {"ok": True, "auth_enabled": auth_enabled()}
 

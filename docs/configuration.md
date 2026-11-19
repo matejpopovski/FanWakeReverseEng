@@ -7,7 +7,7 @@ safety, persona) is edited in the UI and stored in the `settings` table.
 |---|---|---|
 | `SECRET_KEY` | dev placeholder | Signs session cookies. Required in practice. |
 | `TOKEN_ENCRYPTION_KEY` | derived from SECRET_KEY | Fernet key encrypting Fanvue tokens at rest. |
-| `ADMIN_PASSWORD` / `ADMIN_PASSWORD_HASH` | — | Operator login (hash preferred). |
+| `ADMIN_PASSWORD` / `ADMIN_PASSWORD_HASH` | empty | Optional operator login (hash preferred). Empty = no login screen, local-only. |
 | `DATABASE_URL` | `sqlite:///data/wakeful.db` | Or `postgresql+psycopg://…` (install with `uv sync --extra postgres`). |
 | `PUBLIC_BASE_URL` | `http://localhost:8000` | Used for the OAuth redirect URI and webhook URL. |
 | `FANVUE_MODE` | `mock` | `mock` or `live`. |

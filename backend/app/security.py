@@ -55,9 +55,23 @@ def check_session(token: str | None) -> bool:
         return False
 
 
+def auth_enabled() -> bool:
+    """Login is required only when an operator password is configured. With none set, the app runs
+    without a login screen and relies on being bound to 127.0.0.1 (local machine only)."""
+    s = get_settings()
+    return bool(s.admin_password or s.admin_password_hash)
+
+
+def is_signed_in(request: Request) -> bool:
+    return not auth_enabled() or check_session(request.cookies.get(SESSION_COOKIE))
+
+
 def require_operator(request: Request) -> None:
-    """FastAPI dependency: valid session + CSRF header on unsafe methods."""
-    if not check_session(request.cookies.get(SESSION_COOKIE)):
+    """FastAPI dependency: valid session (when login is enabled) + CSRF header on unsafe methods.
+
+    The CSRF header is kept even without login: it forces a CORS preflight, so other websites open in the
+    same browser cannot make state-changing requests to the local app."""
+    if not is_signed_in(request):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not signed in")
     if request.method not in ("GET", "HEAD", "OPTIONS") and request.headers.get(CSRF_HEADER) != CSRF_VALUE:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Missing CSRF header")

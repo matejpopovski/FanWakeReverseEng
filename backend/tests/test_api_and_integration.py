@@ -322,3 +322,16 @@ def test_migrations_up_down_up(tmp_path) -> None:  # type: ignore[no-untyped-def
     assert set(inspect(make_engine(url)).get_table_names()) <= {"alembic_version"}
     upgrade(url)
     assert "fans" in inspect(make_engine(url)).get_table_names()
+
+
+def test_no_password_means_no_login_but_csrf_still_enforced(seeded: Session, monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.config import get_settings
+    from app.main import create_app
+
+    monkeypatch.setattr(get_settings(), "admin_password", "")
+    monkeypatch.setattr(get_settings(), "admin_password_hash", "")
+    with TestClient(create_app()) as c:
+        assert c.get("/api/auth/session").json() == {"ok": True, "auth_enabled": False}
+        assert c.get("/api/fans").status_code == 200  # no login needed
+        assert c.patch("/api/fans/1", json={"notes": "x"}).status_code == 403  # cross-site protection kept
+        assert c.patch("/api/fans/1", json={"notes": "x"}, headers={"X-Requested-With": "wakeful"}).status_code == 200
